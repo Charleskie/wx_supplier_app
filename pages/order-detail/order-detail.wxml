@@ -1,0 +1,4 @@
+<!--pages/order-detail/order-detail.wxml-->
+<view class="container">
+  <text>订单详情页面 - 开发中</text>
+</view>

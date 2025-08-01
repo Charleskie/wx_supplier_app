@@ -1,0 +1,98 @@
+<!--pages/products/products.wxml-->
+<view class="container">
+  <!-- 搜索区域 -->
+  <view class="search-section">
+    <view class="search-box">
+      <input 
+        class="search-input" 
+        placeholder="搜索商品名称或条形码" 
+        value="{{searchKeyword}}"
+        bindinput="onSearchInput"
+        bindconfirm="handleSearch"
+      />
+      <text class="search-btn" bindtap="handleSearch">🔍</text>
+    </view>
+  </view>
+
+  <!-- 商品列表 -->
+  <view class="product-list" wx:if="{{products.length > 0}}">
+    <view 
+      class="product-item" 
+      wx:for="{{products}}" 
+      wx:key="_id"
+      bindtap="navigateToProductDetail"
+      data-id="{{item._id}}"
+    >
+      <view class="product-header">
+        <view class="product-info">
+          <text class="product-name">{{item.name}}</text>
+          <text class="product-barcode">{{item.barcode}}</text>
+        </view>
+        <view class="product-actions">
+          <button 
+            class="btn btn-secondary btn-sm" 
+            bindtap="handleEditProduct" 
+            data-id="{{item._id}}"
+            catchtap="true"
+          >
+            编辑
+          </button>
+          <button 
+            class="btn btn-danger btn-sm" 
+            bindtap="handleDeleteProduct" 
+            data-id="{{item._id}}"
+            catchtap="true"
+          >
+            删除
+          </button>
+        </view>
+      </view>
+      
+      <view class="product-content">
+        <view class="product-details">
+          <view class="detail-item">
+            <text class="detail-label">成本：</text>
+            <text class="detail-value cost">¥{{item.cost}}</text>
+          </view>
+          <view class="detail-item">
+            <text class="detail-label">售价：</text>
+            <text class="detail-value price">¥{{item.price}}</text>
+          </view>
+          <view class="detail-item">
+            <text class="detail-label">库存：</text>
+            <text class="detail-value {{item.stock < 10 ? 'low-stock' : ''}}">{{item.stock}}{{item.unit || '个'}}</text>
+          </view>
+        </view>
+        
+        <view class="product-summary">
+          <text class="stock-status {{item.stock > 0 ? 'in-stock' : 'out-of-stock'}}">
+            {{item.stock > 0 ? '有库存' : '缺货'}}
+          </text>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 空状态 -->
+  <view class="empty" wx:elif="{{!loading}}">
+    <text class="empty-icon">📦</text>
+    <text class="empty-text">暂无商品数据</text>
+    <text class="empty-subtext">点击下方按钮添加第一个商品</text>
+    <button class="btn btn-primary" bindtap="navigateToCreateProduct">添加商品</button>
+  </view>
+
+  <!-- 加载状态 -->
+  <view class="loading" wx:if="{{loading && products.length === 0}}">
+    <text>加载中...</text>
+  </view>
+
+  <!-- 加载更多 -->
+  <view class="load-more" wx:if="{{hasMore && products.length > 0}}">
+    <text class="load-more-text" bindtap="loadMore">加载更多</text>
+  </view>
+
+  <!-- 浮动按钮 -->
+  <view class="fab" bindtap="navigateToCreateProduct">
+    <text>+</text>
+  </view>
+</view> 

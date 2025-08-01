@@ -1,0 +1,100 @@
+<!--pages/index/index.wxml-->
+<view class="container">
+  <!-- 欢迎区域 -->
+  <view class="welcome-section">
+    <view class="welcome-info">
+      <text class="welcome-text">欢迎回来，</text>
+      <text class="user-name">{{userInfo.name || '用户'}}</text>
+    </view>
+    <text class="date-text">{{currentDate}}</text>
+  </view>
+
+  <!-- 统计卡片 -->
+  <view class="stats-grid">
+    <view class="stats-card" bindtap="navigateToDelivery" data-status="pending">
+      <view class="stats-icon pending-icon">🚚</view>
+      <view class="stats-content">
+        <text class="stats-number">{{stats.pendingDeliveries || 0}}</text>
+        <text class="stats-label">待配送</text>
+      </view>
+    </view>
+
+    <view class="stats-card" bindtap="navigateToDelivery" data-status="in_progress">
+      <view class="stats-icon in-progress-icon">📦</view>
+      <view class="stats-content">
+        <text class="stats-number">{{stats.inProgressDeliveries || 0}}</text>
+        <text class="stats-label">配送中</text>
+      </view>
+    </view>
+
+    <view class="stats-card" bindtap="navigateToProducts">
+      <view class="stats-icon product-icon">📋</view>
+      <view class="stats-content">
+        <text class="stats-number">{{stats.totalProducts || 0}}</text>
+        <text class="stats-label">商品总数</text>
+      </view>
+    </view>
+
+    <view class="stats-card" bindtap="navigateToStatistics">
+      <view class="stats-icon revenue-icon">💰</view>
+      <view class="stats-content">
+        <text class="stats-number">¥{{stats.monthlyRevenue || 0}}</text>
+        <text class="stats-label">本月营收</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 快捷操作 -->
+  <view class="quick-actions">
+    <text class="section-title">快捷操作</text>
+    <view class="action-grid">
+      <view class="action-item" bindtap="navigateToCreateDelivery">
+        <view class="action-icon">➕</view>
+        <text class="action-text">新建送货单</text>
+      </view>
+      <view class="action-item" bindtap="navigateToProducts">
+        <view class="action-icon">📦</view>
+        <text class="action-text">商品管理</text>
+      </view>
+      <view class="action-item" bindtap="navigateToCustomers">
+        <view class="action-icon">👥</view>
+        <text class="action-text">客户管理</text>
+      </view>
+      <view class="action-item" bindtap="navigateToEmployees">
+        <view class="action-icon">👨‍💼</view>
+        <text class="action-text">员工管理</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 最近送货单 -->
+  <view class="recent-deliveries">
+    <view class="section-header">
+      <text class="section-title">最近送货单</text>
+      <text class="view-all" bindtap="navigateToDelivery">查看全部</text>
+    </view>
+    
+    <view class="delivery-list" wx:if="{{recentDeliveries.length > 0}}">
+      <view 
+        class="delivery-item" 
+        wx:for="{{recentDeliveries}}" 
+        wx:key="id"
+        bindtap="navigateToDeliveryDetail"
+        data-id="{{item.id}}"
+      >
+        <view class="delivery-info">
+          <text class="delivery-number">送货单号：{{item.deliveryNumber}}</text>
+          <text class="delivery-employee">配送员：{{item.employeeName}}</text>
+        </view>
+        <view class="delivery-status">
+          <text class="tag tag-{{item.status}}">{{deliveryStatusText[item.status]}}</text>
+          <text class="delivery-amount">¥{{item.totalAmount}}</text>
+        </view>
+      </view>
+    </view>
+
+    <view class="empty" wx:else>
+      <text class="empty-text">暂无最近送货单</text>
+    </view>
+  </view>
+</view> 

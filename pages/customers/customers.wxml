@@ -1,0 +1,4 @@
+<!--pages/customers/customers.wxml-->
+<view class="container">
+  <text>客户管理页面 - 开发中</text>
+</view>

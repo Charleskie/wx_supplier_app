@@ -1,0 +1,68 @@
+{
+  "pages": [
+    "pages/login/login",
+    "pages/index/index",
+    "pages/delivery/delivery",
+    "pages/delivery-detail/delivery-detail",
+    "pages/create-delivery/create-delivery",
+    "pages/orders/orders",
+    "pages/order-detail/order-detail",
+    "pages/products/products",
+    "pages/product-detail/product-detail",
+    "pages/customers/customers",
+    "pages/customer-detail/customer-detail",
+    "pages/employees/employees",
+    "pages/employee-detail/employee-detail",
+    "pages/statistics/statistics",
+    "pages/profile/profile"
+  ],
+  "window": {
+    "backgroundTextStyle": "light",
+    "navigationBarBackgroundColor": "#3A7FFF",
+    "navigationBarTitleText": "供应商订单管理",
+    "navigationBarTextStyle": "white",
+    "backgroundColor": "#F5F5F5"
+  },
+  "tabBar": {
+    "color": "#999999",
+    "selectedColor": "#3A7FFF",
+    "backgroundColor": "#FFFFFF",
+    "borderStyle": "black",
+    "list": [
+      {
+        "pagePath": "pages/index/index",
+        "text": "首页",
+        "iconPath": "images/home.png",
+        "selectedIconPath": "images/home-active.png"
+      },
+      {
+        "pagePath": "pages/delivery/delivery",
+        "text": "送货单",
+        "iconPath": "images/delivery.png",
+        "selectedIconPath": "images/delivery-active.png"
+      },
+      {
+        "pagePath": "pages/products/products",
+        "text": "商品",
+        "iconPath": "images/product.png",
+        "selectedIconPath": "images/product-active.png"
+      },
+      {
+        "pagePath": "pages/statistics/statistics",
+        "text": "统计",
+        "iconPath": "images/stats.png",
+        "selectedIconPath": "images/stats-active.png"
+      },
+      {
+        "pagePath": "pages/profile/profile",
+        "text": "我的",
+        "iconPath": "images/profile.png",
+        "selectedIconPath": "images/profile-active.png"
+      }
+    ]
+  },
+  "style": "v2",
+  "sitemapLocation": "sitemap.json",
+  "lazyCodeLoading": "requiredComponents"
+  
+} 

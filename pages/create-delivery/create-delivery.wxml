@@ -1,0 +1,4 @@
+<!--pages/create-delivery/create-delivery.wxml-->
+<view class="container">
+  <text>创建送货单页面 - 开发中</text>
+</view> 

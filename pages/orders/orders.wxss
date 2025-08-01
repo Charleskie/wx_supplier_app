@@ -1,0 +1,6 @@
+/* pages/orders/orders.wxss */
+.container {
+  padding: 40rpx;
+  text-align: center;
+  color: #999999;
+}

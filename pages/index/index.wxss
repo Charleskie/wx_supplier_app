@@ -1,0 +1,224 @@
+/* pages/index/index.wxss */
+.container {
+  padding: 20rpx;
+}
+
+/* 欢迎区域 */
+.welcome-section {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-radius: 20rpx;
+  padding: 40rpx;
+  margin-bottom: 30rpx;
+  color: #FFFFFF;
+}
+
+.welcome-info {
+  margin-bottom: 16rpx;
+}
+
+.welcome-text {
+  font-size: 32rpx;
+  opacity: 0.9;
+}
+
+.user-name {
+  font-size: 36rpx;
+  font-weight: bold;
+  margin-left: 10rpx;
+}
+
+.date-text {
+  font-size: 28rpx;
+  opacity: 0.8;
+}
+
+/* 统计卡片 */
+.stats-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20rpx;
+  margin-bottom: 30rpx;
+}
+
+.stats-card {
+  background: #FFFFFF;
+  border-radius: 16rpx;
+  padding: 30rpx;
+  display: flex;
+  align-items: center;
+  box-shadow: 0 4rpx 12rpx rgba(0, 0, 0, 0.1);
+}
+
+.stats-icon {
+  width: 80rpx;
+  height: 80rpx;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 32rpx;
+  margin-right: 20rpx;
+}
+
+.pending-icon {
+  background: #FFF3CD;
+  color: #856404;
+}
+
+.in-progress-icon {
+  background: #D1ECF1;
+  color: #0C5460;
+}
+
+.product-icon {
+  background: #D4EDDA;
+  color: #155724;
+}
+
+.revenue-icon {
+  background: #D1E7DD;
+  color: #0F5132;
+}
+
+.stats-content {
+  flex: 1;
+}
+
+.stats-number {
+  display: block;
+  font-size: 36rpx;
+  font-weight: bold;
+  color: #333333;
+  margin-bottom: 8rpx;
+}
+
+.stats-label {
+  font-size: 24rpx;
+  color: #666666;
+}
+
+/* 快捷操作 */
+.quick-actions {
+  background: #FFFFFF;
+  border-radius: 16rpx;
+  padding: 30rpx;
+  margin-bottom: 30rpx;
+  box-shadow: 0 4rpx 12rpx rgba(0, 0, 0, 0.1);
+}
+
+.section-title {
+  font-size: 32rpx;
+  font-weight: bold;
+  color: #333333;
+  margin-bottom: 30rpx;
+  display: block;
+}
+
+.action-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr 1fr;
+  gap: 20rpx;
+}
+
+.action-item {
+  text-align: center;
+  padding: 20rpx;
+  border-radius: 12rpx;
+  background: #F8F9FA;
+  transition: all 0.3s ease;
+}
+
+.action-item:active {
+  background: #E9ECEF;
+  transform: scale(0.95);
+}
+
+.action-icon {
+  font-size: 40rpx;
+  margin-bottom: 12rpx;
+}
+
+.action-text {
+  font-size: 24rpx;
+  color: #333333;
+}
+
+/* 最近送货单 */
+.recent-deliveries {
+  background: #FFFFFF;
+  border-radius: 16rpx;
+  padding: 30rpx;
+  box-shadow: 0 4rpx 12rpx rgba(0, 0, 0, 0.1);
+}
+
+.section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 30rpx;
+}
+
+.view-all {
+  font-size: 28rpx;
+  color: #3A7FFF;
+}
+
+.delivery-list {
+  display: flex;
+  flex-direction: column;
+  gap: 20rpx;
+}
+
+.delivery-item {
+  padding: 24rpx;
+  border: 2rpx solid #F0F0F0;
+  border-radius: 12rpx;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  transition: all 0.3s ease;
+}
+
+.delivery-item:active {
+  background: #F8F9FA;
+  border-color: #3A7FFF;
+}
+
+.delivery-info {
+  flex: 1;
+}
+
+.delivery-number {
+  display: block;
+  font-size: 28rpx;
+  font-weight: 500;
+  color: #333333;
+  margin-bottom: 8rpx;
+}
+
+.delivery-employee {
+  font-size: 24rpx;
+  color: #666666;
+}
+
+.delivery-status {
+  text-align: right;
+}
+
+.delivery-amount {
+  display: block;
+  font-size: 28rpx;
+  font-weight: bold;
+  color: #3A7FFF;
+  margin-top: 8rpx;
+}
+
+.empty {
+  text-align: center;
+  padding: 60rpx 0;
+}
+
+.empty-text {
+  font-size: 28rpx;
+  color: #999999;
+} 

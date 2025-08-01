@@ -1,0 +1,45 @@
+<!--pages/login/login.wxml-->
+<view class="container">
+  <view class="login-header">
+    <image class="logo" src="/images/logo.png" mode="aspectFit"></image>
+    <text class="title">供应商订单管理系统</text>
+    <text class="subtitle">请登录您的账户</text>
+  </view>
+
+  <view class="login-form">
+    <view class="form-item">
+      <text class="label">手机号</text>
+      <input 
+        class="input" 
+        type="number" 
+        placeholder="请输入手机号" 
+        value="{{phone}}"
+        bindinput="onPhoneInput"
+        maxlength="11"
+      />
+    </view>
+
+    <view class="form-item">
+      <text class="label">密码</text>
+      <input 
+        class="input" 
+        type="password" 
+        placeholder="请输入密码" 
+        value="{{password}}"
+        bindinput="onPasswordInput"
+      />
+    </view>
+
+    <button 
+      class="btn btn-primary login-btn" 
+      bindtap="handleLogin"
+      loading="{{loading}}"
+    >
+      登录
+    </button>
+
+    <view class="login-tips">
+      <text class="tips-text">测试账号：13800138000 / 123456</text>
+    </view>
+  </view>
+</view> 

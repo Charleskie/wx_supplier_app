@@ -1,0 +1,149 @@
+<!--pages/product-detail/product-detail.wxml-->
+<view class="container">
+  <!-- 顶部操作栏 -->
+  <view class="header">
+    <view class="header-left">
+      <text class="back-btn" bindtap="goBack">←</text>
+    </view>
+    <view class="header-title">
+      <text>{{isEdit ? '编辑商品' : '商品详情'}}</text>
+    </view>
+    <view class="header-right">
+      <text class="edit-btn" bindtap="toggleEdit" wx:if="{{!isEdit}}">编辑</text>
+      <text class="save-btn" bindtap="saveProduct" wx:if="{{isEdit}}">保存</text>
+    </view>
+  </view>
+
+  <!-- 商品图片 -->
+  <view class="image-section">
+    <view class="image-container" bindtap="{{isEdit ? 'chooseImage' : ''}}">
+      <image 
+        class="product-image" 
+        src="{{product.image || '/images/default-product.png'}}" 
+        mode="aspectFill"
+        wx:if="{{product.image}}"
+      />
+      <view class="image-placeholder" wx:else>
+        <text class="placeholder-icon">📷</text>
+        <text class="placeholder-text">{{isEdit ? '点击添加图片' : '暂无图片'}}</text>
+      </view>
+      <view class="image-overlay" wx:if="{{isEdit}}">
+        <text class="overlay-text">点击更换</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 商品信息表单 -->
+  <view class="form-section">
+    <!-- 商品名称 -->
+    <view class="form-item">
+      <text class="form-label">商品名称</text>
+      <input 
+        class="form-input {{isEdit ? 'editable' : ''}}" 
+        value="{{product.name}}"
+        placeholder="请输入商品名称"
+        disabled="{{!isEdit}}"
+        bindinput="onNameInput"
+      />
+    </view>
+
+    <!-- 条形码 -->
+    <view class="form-item">
+      <text class="form-label">条形码</text>
+      <view class="barcode-input">
+        <input 
+          class="form-input {{isEdit ? 'editable' : ''}}" 
+          value="{{product.barcode}}"
+          placeholder="请输入条形码"
+          disabled="{{!isEdit}}"
+          bindinput="onBarcodeInput"
+        />
+        <button 
+          class="scan-btn" 
+          bindtap="scanBarcode"
+          wx:if="{{isEdit}}"
+        >
+          扫码
+        </button>
+      </view>
+    </view>
+
+    <!-- 成本价格 -->
+    <view class="form-item">
+      <text class="form-label">成本价格</text>
+      <input 
+        class="form-input {{isEdit ? 'editable' : ''}}" 
+        type="digit"
+        value="{{product.cost}}"
+        placeholder="请输入成本价格"
+        disabled="{{!isEdit}}"
+        bindinput="onCostInput"
+      />
+    </view>
+
+    <!-- 售价 -->
+    <view class="form-item">
+      <text class="form-label">售价</text>
+      <input 
+        class="form-input {{isEdit ? 'editable' : ''}}" 
+        type="digit"
+        value="{{product.price}}"
+        placeholder="请输入售价"
+        disabled="{{!isEdit}}"
+        bindinput="onPriceInput"
+      />
+    </view>
+
+    <!-- 库存 -->
+    <view class="form-item">
+      <text class="form-label">库存数量</text>
+      <input 
+        class="form-input {{isEdit ? 'editable' : ''}}" 
+        type="number"
+        value="{{product.stock}}"
+        placeholder="请输入库存数量"
+        disabled="{{!isEdit}}"
+        bindinput="onStockInput"
+      />
+    </view>
+
+    <!-- 单位 -->
+    <view class="form-item">
+      <text class="form-label">单位</text>
+      <picker 
+        class="form-picker {{isEdit ? 'editable' : ''}}"
+        mode="selector"
+        range="{{units}}"
+        value="{{unitIndex}}"
+        disabled="{{!isEdit}}"
+        bindchange="onUnitChange"
+      >
+        <view class="picker-text">
+          {{units[unitIndex] || '请选择单位'}}
+        </view>
+      </picker>
+    </view>
+
+    <!-- 创建时间 -->
+    <view class="form-item" wx:if="{{!isEdit}}">
+      <text class="form-label">创建时间</text>
+      <text class="form-text">{{product.createTime}}</text>
+    </view>
+
+    <!-- 更新时间 -->
+    <view class="form-item" wx:if="{{!isEdit}}">
+      <text class="form-label">更新时间</text>
+      <text class="form-text">{{product.updateTime}}</text>
+    </view>
+  </view>
+
+  <!-- 操作按钮 -->
+  <view class="action-section" wx:if="{{!isEdit}}">
+    <button class="btn btn-danger" bindtap="deleteProduct">删除商品</button>
+  </view>
+
+  <!-- 加载状态 -->
+  <view class="loading" wx:if="{{loading}}">
+    <text>加载中...</text>
+  </view>
+</view>

@@ -1,0 +1,132 @@
+<!--pages/delivery/delivery.wxml-->
+<view class="container">
+  <!-- 搜索和筛选 -->
+  <view class="search-section">
+    <view class="search-box">
+      <input 
+        class="search-input" 
+        placeholder="搜索送货单号或配送员" 
+        value="{{searchKeyword}}"
+        bindinput="onSearchInput"
+        bindconfirm="handleSearch"
+      />
+      <text class="search-btn" bindtap="handleSearch">🔍</text>
+    </view>
+    
+    <view class="filter-tabs">
+      <view 
+        class="filter-tab {{currentStatus === '' ? 'active' : ''}}" 
+        bindtap="filterByStatus" 
+        data-status=""
+      >
+        全部
+      </view>
+      <view 
+        class="filter-tab {{currentStatus === 'pending' ? 'active' : ''}}" 
+        bindtap="filterByStatus" 
+        data-status="pending"
+      >
+        待配送
+      </view>
+      <view 
+        class="filter-tab {{currentStatus === 'in_progress' ? 'active' : ''}}" 
+        bindtap="filterByStatus" 
+        data-status="in_progress"
+      >
+        配送中
+      </view>
+      <view 
+        class="filter-tab {{currentStatus === 'completed' ? 'active' : ''}}" 
+        bindtap="filterByStatus" 
+        data-status="completed"
+      >
+        已完成
+      </view>
+    </view>
+  </view>
+
+  <!-- 送货单列表 -->
+  <view class="delivery-list" wx:if="{{deliveries.length > 0}}">
+    <view 
+      class="delivery-item" 
+      wx:for="{{deliveries}}" 
+      wx:key="_id"
+      bindtap="navigateToDeliveryDetail"
+      data-id="{{item._id}}"
+    >
+      <view class="delivery-header">
+        <text class="delivery-number">{{item.deliveryNo}}</text>
+        <text class="tag tag-{{item.status}}">{{deliveryStatusText[item.status]}}</text>
+      </view>
+      
+      <view class="delivery-content">
+        <view class="delivery-info">
+          <text class="employee-name">配送员：{{item.employeeName}}</text>
+          <text class="delivery-date">{{item.createTime}}</text>
+        </view>
+        
+        <view class="delivery-summary">
+          <text class="order-count">{{item.orders ? item.orders.length : 0}}个订单</text>
+          <text class="total-amount">¥{{item.totalAmount}}</text>
+        </view>
+      </view>
+      
+      <view class="delivery-footer">
+        <view class="delivery-actions">
+          <button 
+            class="btn btn-secondary btn-sm" 
+            bindtap="handleEditDelivery" 
+            data-id="{{item._id}}"
+            catchtap="true"
+          >
+            编辑
+          </button>
+          <button 
+            class="btn btn-primary btn-sm" 
+            bindtap="handleStartDelivery" 
+            data-id="{{item._id}}"
+            catchtap="true"
+            wx:if="{{item.status === 'pending'}}"
+          >
+            开始配送
+          </button>
+          <button 
+            class="btn btn-success btn-sm" 
+            bindtap="handleCompleteDelivery" 
+            data-id="{{item._id}}"
+            catchtap="true"
+            wx:if="{{item.status === 'in_progress'}}"
+          >
+            完成配送
+          </button>
+          <button 
+            class="btn btn-danger btn-sm" 
+            bindtap="handleCancelDelivery" 
+            data-id="{{item._id}}"
+            catchtap="true"
+            wx:if="{{item.status === 'pending'}}"
+          >
+            取消
+          </button>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 空状态 -->
+  <view class="empty" wx:else>
+    <text class="empty-icon">🚚</text>
+    <text class="empty-text">暂无送货单数据</text>
+    <button class="btn btn-primary" bindtap="navigateToCreateDelivery">创建送货单</button>
+  </view>
+
+  <!-- 加载更多 -->
+  <view class="load-more" wx:if="{{hasMore && deliveries.length > 0}}">
+    <text class="load-more-text" bindtap="loadMore">加载更多</text>
+  </view>
+
+  <!-- 浮动按钮 -->
+  <view class="fab" bindtap="navigateToCreateDelivery">
+    <text>+</text>
+  </view>
+</view> 

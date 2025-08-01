@@ -1,0 +1,72 @@
+<!--pages/profile/profile.wxml-->
+<view class="container">
+  <!-- 用户信息 -->
+  <view class="user-section">
+    <view class="user-info">
+      <image class="avatar" src="{{userInfo.avatar || '/images/default-avatar.png'}}" mode="aspectFill"></image>
+      <view class="user-details">
+        <text class="user-name">{{userInfo.name || '用户'}}</text>
+        <text class="user-role">{{userInfo.role || '管理员'}}</text>
+      </view>
+    </view>
+    <view class="user-stats">
+      <view class="stat-item">
+        <text class="stat-number">{{userStats.totalDeliveries || 0}}</text>
+        <text class="stat-label">处理送货单</text>
+      </view>
+      <view class="stat-item">
+        <text class="stat-number">{{userStats.totalOrders || 0}}</text>
+        <text class="stat-label">处理订单</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 功能菜单 -->
+  <view class="menu-section">
+    <view class="menu-group">
+      <view class="menu-item" bindtap="navigateToCustomers">
+        <view class="menu-icon">👥</view>
+        <text class="menu-text">客户管理</text>
+        <text class="menu-arrow">></text>
+      </view>
+      <view class="menu-item" bindtap="navigateToEmployees">
+        <view class="menu-icon">👨‍💼</view>
+        <text class="menu-text">员工管理</text>
+        <text class="menu-arrow">></text>
+      </view>
+      <view class="menu-item" bindtap="navigateToSettings">
+        <view class="menu-icon">⚙️</view>
+        <text class="menu-text">系统设置</text>
+        <text class="menu-arrow">></text>
+      </view>
+    </view>
+
+    <view class="menu-group">
+      <view class="menu-item" bindtap="navigateToHelp">
+        <view class="menu-icon">❓</view>
+        <text class="menu-text">帮助中心</text>
+        <text class="menu-arrow">></text>
+      </view>
+      <view class="menu-item" bindtap="navigateToAbout">
+        <view class="menu-icon">ℹ️</view>
+        <text class="menu-text">关于我们</text>
+        <text class="menu-arrow">></text>
+      </view>
+      <view class="menu-item" bindtap="handleFeedback">
+        <view class="menu-icon">💬</view>
+        <text class="menu-text">意见反馈</text>
+        <text class="menu-arrow">></text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 版本信息 -->
+  <view class="version-section">
+    <text class="version-text">版本号：{{version}}</text>
+  </view>
+
+  <!-- 退出登录 -->
+  <view class="logout-section">
+    <button class="btn btn-danger logout-btn" bindtap="handleLogout">退出登录</button>
+  </view>
+</view> 

@@ -1,0 +1,290 @@
+/* pages/product-detail/product-detail.wxss */
+.container {
+  min-height: 100vh;
+  background: #F5F5F5;
+  padding-bottom: 40rpx;
+}
+
+/* 顶部操作栏 */
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20rpx 30rpx;
+  background: #FFFFFF;
+  border-bottom: 1rpx solid #E0E0E0;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+.header-left,
+.header-right {
+  flex: 1;
+}
+
+.header-title {
+  flex: 2;
+  text-align: center;
+  font-size: 32rpx;
+  font-weight: 600;
+  color: #333333;
+}
+
+.back-btn {
+  font-size: 36rpx;
+  color: #666666;
+  padding: 10rpx;
+}
+
+.edit-btn,
+.save-btn {
+  font-size: 28rpx;
+  color: #3A7FFF;
+  padding: 10rpx 20rpx;
+  border-radius: 6rpx;
+  background: #F0F8FF;
+}
+
+/* 商品图片 */
+.image-section {
+  background: #FFFFFF;
+  padding: 40rpx 30rpx;
+  margin-bottom: 20rpx;
+}
+
+.image-container {
+  position: relative;
+  width: 100%;
+  height: 400rpx;
+  border-radius: 16rpx;
+  overflow: hidden;
+  background: #F8F9FA;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.product-image {
+  width: 100%;
+  height: 100%;
+  border-radius: 16rpx;
+}
+
+.image-placeholder {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  color: #999999;
+}
+
+.placeholder-icon {
+  font-size: 80rpx;
+  margin-bottom: 20rpx;
+  opacity: 0.6;
+}
+
+.placeholder-text {
+  font-size: 28rpx;
+  color: #999999;
+}
+
+.image-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+
+.image-container:active .image-overlay {
+  opacity: 1;
+}
+
+.overlay-text {
+  color: #FFFFFF;
+  font-size: 28rpx;
+  background: rgba(0, 0, 0, 0.7);
+  padding: 10rpx 20rpx;
+  border-radius: 20rpx;
+}
+
+/* 表单区域 */
+.form-section {
+  background: #FFFFFF;
+  margin-bottom: 20rpx;
+}
+
+.form-item {
+  display: flex;
+  align-items: center;
+  padding: 30rpx;
+  border-bottom: 1rpx solid #F0F0F0;
+}
+
+.form-item:last-child {
+  border-bottom: none;
+}
+
+.form-label {
+  width: 160rpx;
+  font-size: 28rpx;
+  color: #333333;
+  font-weight: 500;
+  flex-shrink: 0;
+}
+
+.form-input {
+  flex: 1;
+  font-size: 28rpx;
+  color: #333333;
+  background: transparent;
+  border: none;
+  outline: none;
+}
+
+.form-input.editable {
+  background: #F8F9FA;
+  padding: 16rpx 20rpx;
+  border-radius: 8rpx;
+  border: 2rpx solid #E0E0E0;
+}
+
+.form-input.editable:focus {
+  border-color: #3A7FFF;
+  background: #FFFFFF;
+}
+
+.form-text {
+  flex: 1;
+  font-size: 28rpx;
+  color: #666666;
+}
+
+/* 条形码输入 */
+.barcode-input {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 16rpx;
+}
+
+.scan-btn {
+  padding: 12rpx 24rpx;
+  font-size: 24rpx;
+  color: #3A7FFF;
+  background: #F0F8FF;
+  border: 2rpx solid #3A7FFF;
+  border-radius: 6rpx;
+  flex-shrink: 0;
+}
+
+/* 单位选择器 */
+.form-picker {
+  flex: 1;
+}
+
+.picker-text {
+  font-size: 28rpx;
+  color: #333333;
+  padding: 16rpx 20rpx;
+  background: #F8F9FA;
+  border-radius: 8rpx;
+  border: 2rpx solid #E0E0E0;
+}
+
+.form-picker.editable .picker-text {
+  background: #F8F9FA;
+  border-color: #E0E0E0;
+}
+
+/* 操作按钮 */
+.action-section {
+  padding: 40rpx 30rpx;
+}
+
+.btn-danger {
+  width: 100%;
+  background: #FF4757;
+  color: #FFFFFF;
+  border: none;
+  padding: 24rpx;
+  border-radius: 12rpx;
+  font-size: 30rpx;
+}
+
+/* 加载状态 */
+.loading {
+  text-align: center;
+  padding: 100rpx 0;
+  color: #999999;
+  font-size: 28rpx;
+}
+
+/* 响应式设计 */
+@media (max-width: 750rpx) {
+  .header {
+    padding: 16rpx 24rpx;
+  }
+  
+  .header-title {
+    font-size: 30rpx;
+  }
+  
+  .image-container {
+    height: 350rpx;
+  }
+  
+  .form-item {
+    padding: 24rpx;
+  }
+  
+  .form-label {
+    width: 140rpx;
+    font-size: 26rpx;
+  }
+  
+  .form-input,
+  .form-text,
+  .picker-text {
+    font-size: 26rpx;
+  }
+  
+  .placeholder-text {
+    font-size: 26rpx;
+  }
+}
+
+/* 动画效果 */
+.image-container {
+  transition: transform 0.2s;
+}
+
+.image-container:active {
+  transform: scale(0.98);
+}
+
+.form-input.editable {
+  transition: all 0.3s;
+}
+
+/* 错误状态 */
+.form-input.error {
+  border-color: #FF4757;
+  background: #FFF5F5;
+}
+
+/* 成功状态 */
+.form-input.success {
+  border-color: #2E7D32;
+  background: #F5FFF5;
+}

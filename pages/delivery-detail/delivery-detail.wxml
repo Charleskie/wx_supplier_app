@@ -1,0 +1,375 @@
+<!--pages/delivery-detail/delivery-detail.wxml-->
+<view class="container">
+  <!-- 顶部操作栏 -->
+  <view class="header">
+    <view class="header-left">
+      <text class="back-btn" bindtap="goBack">←</text>
+    </view>
+    <view class="header-title">
+      <text>{{isEdit ? '编辑送货单' : '送货单详情'}}</text>
+    </view>
+    <view class="header-right">
+      <text class="edit-btn" bindtap="toggleEdit" wx:if="{{!isEdit && deliveryId}}">编辑</text>
+      <text class="save-btn" bindtap="saveDelivery" wx:if="{{isEdit}}">保存</text>
+    </view>
+  </view>
+
+  <!-- 送货单基本信息 -->
+  <view class="delivery-info" wx:if="{{!isEdit}}">
+    <view class="info-card">
+      <view class="info-row">
+        <text class="info-label">送货单号：</text>
+        <text class="info-value">{{delivery.deliveryNo}}</text>
+      </view>
+      <view class="info-row">
+        <text class="info-label">状态：</text>
+        <text class="status-tag {{delivery.status}}">{{deliveryStatusText}}</text>
+      </view>
+      <view class="info-row">
+        <text class="info-label">配送员：</text>
+        <text class="info-value">{{delivery.employeeName}}</text>
+      </view>
+      <view class="info-row">
+        <text class="info-label">创建时间：</text>
+        <text class="info-value">{{delivery.createTime}}</text>
+      </view>
+      <view class="info-row">
+        <text class="info-label">总金额：</text>
+        <text class="info-value total-amount">¥{{delivery.totalAmount}}</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 客户选择区域 -->
+  <view class="section">
+    <view class="section-header">
+      <text class="section-title">客户信息</text>
+      <text class="add-btn" bindtap="showCustomerSelector" wx:if="{{isEdit}}">+ 添加客户</text>
+    </view>
+    
+    <!-- 已选择的客户列表 -->
+    <view class="customer-list" wx:if="{{selectedCustomers.length > 0}}">
+      <view 
+        class="customer-item" 
+        wx:for="{{selectedCustomers}}" 
+        wx:key="id"
+      >
+        <view class="customer-info">
+          <text class="customer-name">{{item.name}}</text>
+          <text class="customer-phone">{{item.phone}}</text>
+          <text class="customer-address">{{item.address}}</text>
+        </view>
+        <view class="customer-actions">
+          <text class="remove-btn" bindtap="removeCustomer" data-index="{{index}}" wx:if="{{isEdit}}">删除</text>
+        </view>
+      </view>
+    </view>
+
+    <!-- 空状态 -->
+    <view class="empty-state" wx:elif="{{isEdit}}">
+      <text class="empty-icon">👥</text>
+      <text class="empty-text">请选择客户</text>
+      <text class="empty-subtext">点击上方按钮添加客户</text>
+    </view>
+  </view>
+
+  <!-- 订单列表 -->
+  <view class="section">
+    <view class="section-header">
+      <text class="section-title">订单信息</text>
+      <text class="add-btn" bindtap="showOrderCreator" wx:if="{{isEdit}}">+ 添加订单</text>
+    </view>
+    
+    <!-- 订单列表 -->
+    <view class="order-list" wx:if="{{orders.length > 0}}">
+      <!-- 按客户分组显示订单 -->
+      <view 
+        class="customer-orders" 
+        wx:for="{{groupedOrders}}" 
+        wx:key="customerId"
+      >
+        <view class="customer-order-header">
+          <text class="customer-name">{{item.customerName}}</text>
+          <text class="order-count">({{item.orders.length}}个订单)</text>
+        </view>
+        
+        <view 
+          class="order-item" 
+          wx:for="{{item.orders}}" 
+          wx:key="orderId"
+          wx:for-item="order"
+        >
+          <view class="order-header">
+            <text class="order-title">订单 #{{order.orderNo || index + 1}}</text>
+            <text class="order-amount">¥{{order.totalAmount}}</text>
+          </view>
+        
+          <!-- 订单商品列表 -->
+          <view class="order-products">
+            <view 
+              class="product-item" 
+              wx:for="{{order.products}}" 
+              wx:key="productId"
+              wx:for-item="product"
+              wx:for-index="productIndex"
+            >
+              <image class="product-image" src="{{product.image || '/images/default-product.png'}}" mode="aspectFill" />
+              <view class="product-info">
+                <text class="product-name">{{product.name}}</text>
+                <text class="product-barcode">{{product.barcode}}</text>
+              </view>
+              <view class="product-details">
+                <view class="detail-row">
+                  <text class="detail-label">数量：</text>
+                  <text class="detail-value">{{product.quantity}}{{product.unit}}</text>
+                </view>
+                <view class="detail-row">
+                  <text class="detail-label">成本：</text>
+                  <text class="detail-value cost">¥{{product.cost}}</text>
+                </view>
+                <view class="detail-row">
+                  <text class="detail-label">售价：</text>
+                  <text class="detail-value price">¥{{product.price}}</text>
+                </view>
+                <view class="detail-row">
+                  <text class="detail-label">建议零售价：</text>
+                  <text class="detail-value retail">¥{{product.retailPrice}}</text>
+                </view>
+              </view>
+              <view class="product-actions" wx:if="{{isEdit}}">
+                <text class="edit-btn" bindtap="editOrderProduct" data-order-index="{{order.orderIndex}}" data-product-index="{{productIndex}}">编辑</text>
+                <text class="remove-btn" bindtap="removeOrderProduct" data-order-index="{{order.orderIndex}}" data-product-index="{{productIndex}}">删除</text>
+              </view>
+            </view>
+          </view>
+          
+          <view class="order-actions" wx:if="{{isEdit}}">
+            <text class="add-product-btn" bindtap="addProductToOrder" data-order-index="{{order.orderIndex}}">+ 添加商品</text>
+            <text class="remove-order-btn" bindtap="removeOrder" data-order-index="{{order.orderIndex}}">删除订单</text>
+          </view>
+        </view>
+      </view>
+    </view>
+
+    <!-- 空状态 -->
+    <view class="empty-state" wx:elif="{{isEdit}}">
+      <text class="empty-icon">📦</text>
+      <text class="empty-text">暂无订单</text>
+      <text class="empty-subtext">请先选择客户，然后添加订单</text>
+    </view>
+  </view>
+
+  <!-- 配送员选择 -->
+  <view class="section" wx:if="{{isEdit}}">
+    <view class="section-header">
+      <text class="section-title">配送员</text>
+    </view>
+    <picker 
+      class="employee-picker"
+      mode="selector"
+      range="{{employees}}"
+      range-key="name"
+      value="{{employeeIndex}}"
+      bindchange="onEmployeeChange"
+    >
+      <view class="picker-text">
+        {{employees[employeeIndex].name || '请选择配送员'}}
+      </view>
+    </picker>
+  </view>
+
+  <!-- 备注信息 -->
+  <view class="section" wx:if="{{isEdit}}">
+    <view class="section-header">
+      <text class="section-title">备注</text>
+    </view>
+    <textarea 
+      class="remark-input"
+      placeholder="请输入备注信息"
+      value="{{remark}}"
+      bindinput="onRemarkInput"
+      maxlength="200"
+    />
+  </view>
+
+  <!-- 操作按钮 -->
+  <view class="action-section" wx:if="{{!isEdit && deliveryId}}">
+    <button class="btn btn-primary" bindtap="confirmDelivery" wx:if="{{delivery.status === 'pending'}}">确认送货</button>
+    <button class="btn btn-danger" bindtap="deleteDelivery">删除送货单</button>
+  </view>
+
+  <!-- 加载状态 -->
+  <view class="loading" wx:if="{{loading}}">
+    <text>加载中...</text>
+  </view>
+</view>
+
+<!-- 客户选择弹窗 -->
+<view class="modal" wx:if="{{showCustomerModal}}">
+  <view class="modal-mask" bindtap="hideCustomerSelector"></view>
+  <view class="modal-content">
+    <view class="modal-header">
+      <text class="modal-title">选择客户</text>
+      <text class="modal-close" bindtap="hideCustomerSelector">×</text>
+    </view>
+    <view class="modal-body">
+      <view class="customer-search">
+        <input 
+          class="search-input" 
+          placeholder="搜索客户姓名或电话" 
+          value="{{customerSearchKeyword}}"
+          bindinput="onCustomerSearchInput"
+        />
+      </view>
+      <view class="customer-options">
+        <view 
+          class="customer-option" 
+          wx:for="{{filteredCustomers}}" 
+          wx:key="id"
+          bindtap="selectCustomer"
+          data-customer="{{item}}"
+        >
+          <text class="customer-name">{{item.name}}</text>
+          <text class="customer-phone">{{item.phone}}</text>
+          <text class="customer-address">{{item.address}}</text>
+        </view>
+      </view>
+    </view>
+  </view>
+</view>
+
+<!-- 订单创建弹窗 -->
+<view class="modal" wx:if="{{showOrderModal}}">
+  <view class="modal-mask" bindtap="hideOrderCreator"></view>
+  <view class="modal-content">
+    <view class="modal-header">
+      <text class="modal-title">创建订单</text>
+      <text class="modal-close" bindtap="hideOrderCreator">×</text>
+    </view>
+    <view class="modal-body">
+      <view class="order-customer-select">
+        <text class="select-label">选择客户：</text>
+        <picker 
+          mode="selector"
+          range="{{selectedCustomers}}"
+          range-key="name"
+          value="{{selectedCustomerIndex}}"
+          bindchange="onSelectedCustomerChange"
+        >
+          <view class="picker-text">
+            {{selectedCustomers[selectedCustomerIndex].name || '请选择客户'}}
+          </view>
+        </picker>
+        <text class="customer-order-count">
+          (已有{{getCustomerOrderCount(selectedCustomers[selectedCustomerIndex]._id)}}个订单)
+        </text>
+      </view>
+      <view class="order-products-section">
+        <view class="section-header">
+          <text class="section-title">商品列表</text>
+          <text class="add-btn" bindtap="showProductSelector">+ 添加商品</text>
+        </view>
+        <view class="order-products-list">
+          <view 
+            class="order-product-item" 
+            wx:for="{{tempOrderProducts}}" 
+            wx:key="productId"
+          >
+            <image class="product-image" src="{{item.image || '/images/default-product.png'}}" mode="aspectFill" />
+            <view class="product-info">
+              <text class="product-name">{{item.name}}</text>
+              <text class="product-barcode">{{item.barcode}}</text>
+            </view>
+            <view class="product-inputs">
+              <view class="input-row">
+                <text class="input-label">数量：</text>
+                <input 
+                  class="quantity-input" 
+                  type="number" 
+                  value="{{item.quantity}}"
+                  bindinput="onQuantityInput"
+                  data-index="{{index}}"
+                />
+                <text class="unit-text">{{item.unit}}</text>
+              </view>
+              <view class="input-row">
+                <text class="input-label">成本：</text>
+                <input 
+                  class="cost-input" 
+                  type="digit" 
+                  value="{{item.cost}}"
+                  bindinput="onCostInput"
+                  data-index="{{index}}"
+                />
+              </view>
+              <view class="input-row">
+                <text class="input-label">售价：</text>
+                <input 
+                  class="price-input" 
+                  type="digit" 
+                  value="{{item.price}}"
+                  bindinput="onPriceInput"
+                  data-index="{{index}}"
+                />
+              </view>
+              <view class="input-row">
+                <text class="input-label">建议零售价：</text>
+                <input 
+                  class="retail-input" 
+                  type="digit" 
+                  value="{{item.retailPrice}}"
+                  bindinput="onRetailPriceInput"
+                  data-index="{{index}}"
+                />
+              </view>
+            </view>
+            <view class="product-actions">
+              <text class="remove-btn" bindtap="removeTempProduct" data-index="{{index}}">删除</text>
+            </view>
+          </view>
+        </view>
+      </view>
+      <view class="modal-actions">
+        <button class="btn btn-secondary" bindtap="hideOrderCreator">取消</button>
+        <button class="btn btn-primary" bindtap="confirmOrder">确认订单</button>
+      </view>
+    </view>
+  </view>
+</view>
+
+<!-- 商品选择弹窗 -->
+<view class="modal" wx:if="{{showProductModal}}">
+  <view class="modal-mask" bindtap="hideProductSelector"></view>
+  <view class="modal-content">
+    <view class="modal-header">
+      <text class="modal-title">选择商品</text>
+      <text class="modal-close" bindtap="hideProductSelector">×</text>
+    </view>
+    <view class="modal-body">
+      <view class="product-search">
+        <input 
+          class="search-input" 
+          placeholder="搜索商品名称或条形码" 
+          value="{{productSearchKeyword}}"
+          bindinput="onProductSearchInput"
+        />
+      </view>
+      <view class="product-options">
+        <view 
+          class="product-option" 
+          wx:for="{{filteredProducts}}" 
+          wx:key="id"
+          bindtap="selectProduct"
+          data-product="{{item}}"
+        >
+          <image class="product-image" src="{{item.image || '/images/default-product.png'}}" mode="aspectFill" />
+          <view class="product-info">
+            <text class="product-name">{{item.name}}</text>
+            <text class="product-barcode">{{item.barcode}}</text>
+            <text class="product-price">成本：¥{{item.cost}} | 售价：¥{{item.price}}</text>
+          </view>
+        </view>
+      </view>
+    </view>
+  </view>
+</view> 

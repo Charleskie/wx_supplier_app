@@ -1,0 +1,117 @@
+<!--pages/statistics/statistics.wxml-->
+<view class="container">
+  <!-- 时间筛选 -->
+  <view class="filter-section">
+    <view class="time-filter">
+      <picker 
+        mode="date" 
+        fields="month" 
+        value="{{currentMonth}}" 
+        bindchange="onMonthChange"
+      >
+        <view class="picker-box">
+          <text class="picker-text">{{currentMonth}}</text>
+          <text class="picker-arrow">▼</text>
+        </view>
+      </picker>
+    </view>
+  </view>
+
+  <!-- 统计概览 -->
+  <view class="overview-section">
+    <view class="overview-card">
+      <view class="overview-item">
+        <text class="overview-number">¥{{stats.monthlyGMV || 0}}</text>
+        <text class="overview-label">月度GMV</text>
+      </view>
+      <view class="overview-item">
+        <text class="overview-number">{{stats.totalDeliveries || 0}}</text>
+        <text class="overview-label">送货单数</text>
+      </view>
+      <view class="overview-item">
+        <text class="overview-number">{{stats.totalOrders || 0}}</text>
+        <text class="overview-label">订单总数</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 员工统计 -->
+  <view class="employee-section">
+    <text class="section-title">员工配送统计</text>
+    <view class="employee-list" wx:if="{{employeeStats.length > 0}}">
+      <view 
+        class="employee-item" 
+        wx:for="{{employeeStats}}" 
+        wx:key="id"
+        bindtap="navigateToEmployeeDetail"
+        data-id="{{item.id}}"
+      >
+        <view class="employee-info">
+          <text class="employee-name">{{item.name}}</text>
+          <text class="employee-role">{{item.role}}</text>
+        </view>
+        <view class="employee-stats">
+          <view class="stat-row">
+            <text class="stat-label">配送单数：</text>
+            <text class="stat-value">{{item.deliveryCount}}</text>
+          </view>
+          <view class="stat-row">
+            <text class="stat-label">配送成本：</text>
+            <text class="stat-value cost">¥{{item.deliveryCost}}</text>
+          </view>
+          <view class="stat-row">
+            <text class="stat-label">配送金额：</text>
+            <text class="stat-value revenue">¥{{item.deliveryAmount}}</text>
+          </view>
+        </view>
+      </view>
+    </view>
+    <view class="empty" wx:else>
+      <text class="empty-text">暂无员工数据</text>
+    </view>
+  </view>
+
+  <!-- 客户统计 -->
+  <view class="customer-section">
+    <text class="section-title">客户订单统计</text>
+    <view class="customer-list" wx:if="{{customerStats.length > 0}}">
+      <view 
+        class="customer-item" 
+        wx:for="{{customerStats}}" 
+        wx:key="id"
+        bindtap="navigateToCustomerDetail"
+        data-id="{{item.id}}"
+      >
+        <view class="customer-info">
+          <text class="customer-name">{{item.name}}</text>
+          <text class="customer-phone">{{item.phone}}</text>
+        </view>
+        <view class="customer-stats">
+          <view class="stat-row">
+            <text class="stat-label">订单数：</text>
+            <text class="stat-value">{{item.orderCount}}</text>
+          </view>
+          <view class="stat-row">
+            <text class="stat-label">订单成本：</text>
+            <text class="stat-value cost">¥{{item.orderCost}}</text>
+          </view>
+          <view class="stat-row">
+            <text class="stat-label">订单金额：</text>
+            <text class="stat-value revenue">¥{{item.orderAmount}}</text>
+          </view>
+        </view>
+      </view>
+    </view>
+    <view class="empty" wx:else>
+      <text class="empty-text">暂无客户数据</text>
+    </view>
+  </view>
+
+  <!-- 趋势图表 -->
+  <view class="trend-section">
+    <text class="section-title">配送趋势</text>
+    <view class="trend-chart">
+      <canvas canvas-id="trendChart" class="chart-canvas"></canvas>
+    </view>
+  </view>
+</view> 

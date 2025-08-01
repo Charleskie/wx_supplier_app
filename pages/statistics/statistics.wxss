@@ -1,0 +1,225 @@
+/* pages/statistics/statistics.wxss */
+.container {
+  padding: 20rpx;
+}
+
+/* 筛选区域 */
+.filter-section {
+  margin-bottom: 30rpx;
+}
+
+.time-filter {
+  background: #FFFFFF;
+  border-radius: 12rpx;
+  padding: 20rpx;
+  box-shadow: 0 2rpx 8rpx rgba(0, 0, 0, 0.1);
+}
+
+.picker-box {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16rpx 0;
+}
+
+.picker-text {
+  font-size: 28rpx;
+  color: #333333;
+  font-weight: 500;
+}
+
+.picker-arrow {
+  font-size: 24rpx;
+  color: #999999;
+}
+
+/* 统计概览 */
+.overview-section {
+  margin-bottom: 30rpx;
+}
+
+.overview-card {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-radius: 16rpx;
+  padding: 40rpx;
+  display: flex;
+  justify-content: space-between;
+  color: #FFFFFF;
+}
+
+.overview-item {
+  text-align: center;
+  flex: 1;
+}
+
+.overview-number {
+  display: block;
+  font-size: 36rpx;
+  font-weight: bold;
+  margin-bottom: 8rpx;
+}
+
+.overview-label {
+  font-size: 24rpx;
+  opacity: 0.9;
+}
+
+/* 员工统计 */
+.employee-section {
+  background: #FFFFFF;
+  border-radius: 16rpx;
+  padding: 30rpx;
+  margin-bottom: 30rpx;
+  box-shadow: 0 4rpx 12rpx rgba(0, 0, 0, 0.1);
+}
+
+.section-title {
+  font-size: 32rpx;
+  font-weight: bold;
+  color: #333333;
+  margin-bottom: 30rpx;
+  display: block;
+}
+
+.employee-list {
+  display: flex;
+  flex-direction: column;
+  gap: 20rpx;
+}
+
+.employee-item {
+  padding: 24rpx;
+  background: #F8F9FA;
+  border-radius: 12rpx;
+  transition: all 0.3s ease;
+}
+
+.employee-item:active {
+  background: #E9ECEF;
+}
+
+.employee-info {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16rpx;
+}
+
+.employee-name {
+  font-size: 28rpx;
+  font-weight: 500;
+  color: #333333;
+}
+
+.employee-role {
+  font-size: 24rpx;
+  color: #666666;
+}
+
+.employee-stats {
+  display: flex;
+  flex-direction: column;
+  gap: 8rpx;
+}
+
+.stat-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.stat-label {
+  font-size: 26rpx;
+  color: #666666;
+}
+
+.stat-value {
+  font-size: 26rpx;
+  font-weight: 500;
+}
+
+.stat-value.cost {
+  color: #FF4757;
+}
+
+.stat-value.revenue {
+  color: #2ED573;
+}
+
+/* 客户统计 */
+.customer-section {
+  background: #FFFFFF;
+  border-radius: 16rpx;
+  padding: 30rpx;
+  margin-bottom: 30rpx;
+  box-shadow: 0 4rpx 12rpx rgba(0, 0, 0, 0.1);
+}
+
+.customer-list {
+  display: flex;
+  flex-direction: column;
+  gap: 20rpx;
+}
+
+.customer-item {
+  padding: 24rpx;
+  background: #F8F9FA;
+  border-radius: 12rpx;
+  transition: all 0.3s ease;
+}
+
+.customer-item:active {
+  background: #E9ECEF;
+}
+
+.customer-info {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16rpx;
+}
+
+.customer-name {
+  font-size: 28rpx;
+  font-weight: 500;
+  color: #333333;
+}
+
+.customer-phone {
+  font-size: 24rpx;
+  color: #666666;
+}
+
+.customer-stats {
+  display: flex;
+  flex-direction: column;
+  gap: 8rpx;
+}
+
+/* 趋势图表 */
+.trend-section {
+  background: #FFFFFF;
+  border-radius: 16rpx;
+  padding: 30rpx;
+  box-shadow: 0 4rpx 12rpx rgba(0, 0, 0, 0.1);
+}
+
+.trend-chart {
+  margin-top: 20rpx;
+}
+
+.chart-canvas {
+  width: 100%;
+  height: 200rpx;
+}
+
+/* 空状态 */
+.empty {
+  text-align: center;
+  padding: 60rpx 0;
+}
+
+.empty-text {
+  font-size: 28rpx;
+  color: #999999;
+} 
