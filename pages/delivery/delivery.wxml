@@ -1,6 +1,5 @@
 <!--pages/delivery/delivery.wxml-->
 <view class="container">
-  <!-- 搜索和筛选 -->
   <view class="search-section">
     <view class="search-box">
       <input 
@@ -45,7 +44,6 @@
     </view>
   </view>
 
-  <!-- 送货单列表 -->
   <view class="delivery-list" wx:if="{{deliveries.length > 0}}">
     <view 
       class="delivery-item" 
@@ -70,63 +68,13 @@
           <text class="total-amount">¥{{item.totalAmount}}</text>
         </view>
       </view>
-      
-      <view class="delivery-footer">
-        <view class="delivery-actions">
-          <button 
-            class="btn btn-secondary btn-sm" 
-            bindtap="handleEditDelivery" 
-            data-id="{{item._id}}"
-            catchtap="true"
-          >
-            编辑
-          </button>
-          <button 
-            class="btn btn-primary btn-sm" 
-            bindtap="handleStartDelivery" 
-            data-id="{{item._id}}"
-            catchtap="true"
-            wx:if="{{item.status === 'pending'}}"
-          >
-            开始配送
-          </button>
-          <button 
-            class="btn btn-success btn-sm" 
-            bindtap="handleCompleteDelivery" 
-            data-id="{{item._id}}"
-            catchtap="true"
-            wx:if="{{item.status === 'in_progress'}}"
-          >
-            完成配送
-          </button>
-          <button 
-            class="btn btn-danger btn-sm" 
-            bindtap="handleCancelDelivery" 
-            data-id="{{item._id}}"
-            catchtap="true"
-            wx:if="{{item.status === 'pending'}}"
-          >
-            取消
-          </button>
-        </view>
-      </view>
     </view>
   </view>
 
-  <!-- 空状态 -->
-  <view class="empty" wx:else>
-    <text class="empty-icon">🚚</text>
-    <text class="empty-text">暂无送货单数据</text>
-    <button class="btn btn-primary" bindtap="navigateToCreateDelivery">创建送货单</button>
-  </view>
-
-  <!-- 加载更多 -->
-  <view class="load-more" wx:if="{{hasMore && deliveries.length > 0}}">
-    <text class="load-more-text" bindtap="loadMore">加载更多</text>
-  </view>
-
-  <!-- 浮动按钮 -->
-  <view class="fab" bindtap="navigateToCreateDelivery">
-    <text>+</text>
+  <view class="empty-state" wx:else>
+    <text class="empty-text">暂无送货单</text>
+    <button class="btn btn-primary" bindtap="navigateToCreateDelivery">
+      创建送货单
+    </button>
   </view>
 </view> 

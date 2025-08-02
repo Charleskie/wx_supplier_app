@@ -16,22 +16,15 @@ Page({
     customerSearchKeyword: '',
     showCustomerModal: false,
     
-    // 订单相关
-    orders: [],
-    groupedOrders: [], // 按客户分组的订单
-    tempOrderProducts: [],
-    selectedCustomerIndex: 0,
-    showOrderModal: false,
-    
     // 商品相关
     products: [],
     filteredProducts: [],
     productSearchKeyword: '',
     showProductModal: false,
     
-    // 配送员相关
-    employees: [],
-    employeeIndex: 0,
+    // 当前操作的客户和订单索引
+    currentCustomerIndex: -1,
+    currentOrderIndex: -1,
     
     // 其他
     remark: '',
@@ -70,15 +63,9 @@ Page({
           delivery,
           deliveryStatusText,
           selectedCustomers: delivery.customers || [],
-          orders: delivery.orders || [],
-          employees: delivery.employees || [],
-          employeeIndex: delivery.employeeIndex || 0,
           remark: delivery.remark || '',
           loading: false
         })
-        
-        // 更新分组
-        this.groupOrdersByCustomer()
       }
     })
     .catch(err => {
@@ -94,14 +81,17 @@ Page({
   loadInitialData() {
     this.loadCustomers()
     this.loadProducts()
-    this.loadEmployees()
   },
 
   // 加载客户列表
   loadCustomers() {
     app.request({
       url: '/customer/getCustomers',
-      data: { page: 1, pageSize: 100 }
+      data: {
+        page: 1,
+        pageSize: 100,
+        keyword: this.data.customerSearchKeyword
+      }
     })
     .then(res => {
       if (res.success) {
@@ -112,7 +102,10 @@ Page({
       }
     })
     .catch(err => {
-      console.error('加载客户列表失败:', err)
+      wx.showToast({
+        title: err || '加载客户失败',
+        icon: 'none'
+      })
     })
   },
 
@@ -120,7 +113,11 @@ Page({
   loadProducts() {
     app.request({
       url: '/product/getProducts',
-      data: { page: 1, pageSize: 100 }
+      data: {
+        page: 1,
+        pageSize: 100,
+        keyword: this.data.productSearchKeyword
+      }
     })
     .then(res => {
       if (res.success) {
@@ -131,25 +128,10 @@ Page({
       }
     })
     .catch(err => {
-      console.error('加载商品列表失败:', err)
-    })
-  },
-
-  // 加载配送员列表
-  loadEmployees() {
-    app.request({
-      url: '/employee/getEmployees',
-      data: { page: 1, pageSize: 100 }
-    })
-    .then(res => {
-      if (res.success) {
-        this.setData({
-          employees: res.data.employees
-        })
-      }
-    })
-    .catch(err => {
-      console.error('加载配送员列表失败:', err)
+      wx.showToast({
+        title: err || '加载商品失败',
+        icon: 'none'
+      })
     })
   },
 
@@ -158,7 +140,8 @@ Page({
     const statusMap = {
       'pending': '待配送',
       'in_progress': '配送中',
-      'completed': '已完成'
+      'completed': '已完成',
+      'cancelled': '已取消'
     }
     return statusMap[status] || '未知状态'
   },
@@ -172,112 +155,114 @@ Page({
   toggleEdit() {
     this.setData({
       isEdit: true,
-      originalData: {
-        selectedCustomers: [...this.data.selectedCustomers],
-        orders: [...this.data.orders],
-        employeeIndex: this.data.employeeIndex,
-        remark: this.data.remark
-      }
+      originalData: JSON.parse(JSON.stringify(this.data.selectedCustomers))
     })
   },
 
   // 保存送货单
   saveDelivery() {
-    const { selectedCustomers, orders, employees, employeeIndex, remark } = this.data
-    
-    if (selectedCustomers.length === 0) {
+    if (this.data.selectedCustomers.length === 0) {
       wx.showToast({
-        title: '请选择至少一个客户',
+        title: '请至少选择一个客户',
         icon: 'none'
       })
       return
     }
 
-    if (orders.length === 0) {
-      wx.showToast({
-        title: '请添加至少一个订单',
-        icon: 'none'
-      })
-      return
-    }
-
-    if (employees.length === 0 || employeeIndex >= employees.length) {
-      wx.showToast({
-        title: '请选择配送员',
-        icon: 'none'
-      })
-      return
-    }
-
-    const deliveryData = {
-      customers: selectedCustomers,
-      orders: orders,
-      employeeId: employees[employeeIndex]._id,
-      employeeName: employees[employeeIndex].name,
-      remark: remark,
-      status: 'pending',
-      totalAmount: this.calculateTotalAmount(orders)
-    }
-
-    wx.showLoading({ title: '保存中...' })
-
-    const requestData = this.data.deliveryId 
-      ? { ...deliveryData, id: this.data.deliveryId }
-      : deliveryData
-
-    app.request({
-      url: this.data.deliveryId ? '/delivery/updateDelivery' : '/delivery/createDelivery',
-      data: requestData
-    })
-    .then(res => {
-      if (res.success) {
+    // 验证每个客户是否有订单
+    for (let customer of this.data.selectedCustomers) {
+      if (customer.orders.length === 0) {
         wx.showToast({
-          title: '保存成功',
-          icon: 'success'
+          title: `客户 ${customer.customerName} 没有订单`,
+          icon: 'none'
         })
-        
-        if (!this.data.deliveryId) {
-          // 新建送货单，跳转到详情页
-          wx.redirectTo({
-            url: `/pages/delivery-detail/delivery-detail?id=${res.data.id}`
+        return
+      }
+    }
+
+    this.setData({ loading: true })
+
+    const totalAmount = this.data.selectedCustomers.reduce((sum, customer) => sum + customer.totalAmount, 0)
+    const deliveryData = {
+      customers: this.data.selectedCustomers,
+      totalAmount,
+      status: 'pending'
+    }
+
+    if (this.data.deliveryId) {
+      // 更新送货单
+      deliveryData.id = this.data.deliveryId
+      app.request({
+        url: '/delivery/updateDelivery',
+        data: deliveryData
+      })
+      .then(res => {
+        if (res.success) {
+          wx.showToast({
+            title: '保存成功',
+            icon: 'success'
           })
-        } else {
           this.setData({
             isEdit: false,
-            delivery: res.data
+            loading: false
+          })
+          this.loadDeliveryDetail()
+        } else {
+          wx.showToast({
+            title: res.message || '保存失败',
+            icon: 'none'
+          })
+          this.setData({ loading: false })
+        }
+      })
+      .catch(err => {
+        wx.showToast({
+          title: err || '保存失败',
+          icon: 'none'
+        })
+        this.setData({ loading: false })
+      })
+    } else {
+      // 创建送货单
+      app.request({
+        url: '/delivery/createDelivery',
+        data: deliveryData
+      })
+      .then(res => {
+        if (res.success) {
+          wx.showToast({
+            title: '创建成功',
+            icon: 'success'
+          })
+          setTimeout(() => {
+            wx.navigateBack()
+          }, 1500)
+        } else {
+          wx.showToast({
+            title: res.message || '创建失败',
+            icon: 'none'
           })
         }
-      }
-    })
-    .catch(err => {
-      wx.showToast({
-        title: err || '保存失败',
-        icon: 'none'
+        this.setData({ loading: false })
       })
-    })
-    .finally(() => {
-      wx.hideLoading()
-    })
-  },
-
-  // 计算总金额
-  calculateTotalAmount(orders) {
-    return orders.reduce((total, order) => {
-      return total + order.products.reduce((orderTotal, product) => {
-        return orderTotal + (product.quantity * product.price)
-      }, 0)
-    }, 0)
+      .catch(err => {
+        wx.showToast({
+          title: err || '创建失败',
+          icon: 'none'
+        })
+        this.setData({ loading: false })
+      })
+    }
   },
 
   // 删除送货单
   deleteDelivery() {
     wx.showModal({
       title: '确认删除',
-      content: '确定要删除这个送货单吗？删除后无法恢复。',
-      confirmColor: '#FF4757',
+      content: '确定要删除这个送货单吗？',
       success: (res) => {
         if (res.confirm) {
-          wx.showLoading({ title: '删除中...' })
+          this.setData({ loading: true })
           
           app.request({
             url: '/delivery/deleteDelivery',
@@ -289,38 +274,41 @@ Page({
                 title: '删除成功',
                 icon: 'success'
               })
-              
               setTimeout(() => {
                 wx.navigateBack()
               }, 1500)
+            } else {
+              wx.showToast({
+                title: res.message || '删除失败',
+                icon: 'none'
+              })
             }
+            this.setData({ loading: false })
           })
           .catch(err => {
             wx.showToast({
               title: err || '删除失败',
               icon: 'none'
             })
-          })
-          .finally(() => {
-            wx.hideLoading()
+            this.setData({ loading: false })
           })
         }
       }
     })
   },
 
-  // 确认送货
+  // 确认配送
   confirmDelivery() {
     wx.showModal({
-      title: '确认送货',
+      title: '确认配送',
       content: '确定要开始配送这个送货单吗？',
       success: (res) => {
         if (res.confirm) {
-          wx.showLoading({ title: '更新中...' })
+          this.setData({ loading: true })
           
           app.request({
             url: '/delivery/updateDeliveryStatus',
-            data: { 
+            data: {
               id: this.data.deliveryId,
               status: 'in_progress'
             }
@@ -328,141 +316,181 @@ Page({
           .then(res => {
             if (res.success) {
               wx.showToast({
-                title: '已开始配送',
+                title: '配送已开始',
                 icon: 'success'
               })
-              
               this.loadDeliveryDetail()
+            } else {
+              wx.showToast({
+                title: res.message || '操作失败',
+                icon: 'none'
+              })
             }
+            this.setData({ loading: false })
           })
           .catch(err => {
             wx.showToast({
               title: err || '操作失败',
               icon: 'none'
             })
-          })
-          .finally(() => {
-            wx.hideLoading()
+            this.setData({ loading: false })
           })
         }
       }
     })
   },
 
-  // 客户选择相关
+  // 显示客户选择弹窗
   showCustomerSelector() {
     this.setData({
-      showCustomerModal: true,
-      customerSearchKeyword: '',
-      filteredCustomers: this.data.customers
+      showCustomerModal: true
     })
   },
 
+  // 隐藏客户选择弹窗
   hideCustomerSelector() {
     this.setData({
       showCustomerModal: false
     })
   },
 
+  // 客户搜索输入
   onCustomerSearchInput(e) {
     const keyword = e.detail.value
+    this.setData({
+      customerSearchKeyword: keyword
+    })
+    
     const filtered = this.data.customers.filter(customer => 
       customer.name.includes(keyword) || customer.phone.includes(keyword)
     )
     
     this.setData({
-      customerSearchKeyword: keyword,
       filteredCustomers: filtered
     })
   },
 
+  // 选择客户
   selectCustomer(e) {
     const customer = e.currentTarget.dataset.customer
+    const selectedCustomers = [...this.data.selectedCustomers]
     
-    // 检查是否已选择
-    const exists = this.data.selectedCustomers.find(c => c._id === customer._id)
+    // 检查是否已选择该客户
+    const exists = selectedCustomers.find(c => c.customerId === customer._id)
     if (exists) {
       wx.showToast({
-        title: '该客户已选择',
+        title: '该客户已添加',
         icon: 'none'
       })
       return
     }
-    
+
+    // 添加客户，初始化订单数组
+    selectedCustomers.push({
+      customerId: customer._id,
+      customerName: customer.name,
+      customerPhone: customer.phone,
+      customerAddress: customer.address,
+      orders: [],
+      totalAmount: 0
+    })
+
     this.setData({
-      selectedCustomers: [...this.data.selectedCustomers, customer],
+      selectedCustomers,
       showCustomerModal: false
     })
   },
 
+  // 移除客户
   removeCustomer(e) {
     const index = e.currentTarget.dataset.index
     const selectedCustomers = [...this.data.selectedCustomers]
     selectedCustomers.splice(index, 1)
     
-    this.setData({ selectedCustomers })
+    this.setData({
+      selectedCustomers
+    })
   },
 
-  // 订单创建相关
-  showOrderCreator() {
-    if (this.data.selectedCustomers.length === 0) {
-      wx.showToast({
-        title: '请先选择客户',
-        icon: 'none'
-      })
-      return
+  // 为客户添加订单
+  addOrder(e) {
+    const customerIndex = e.currentTarget.dataset.customerIndex
+    const selectedCustomers = [...this.data.selectedCustomers]
+    
+    // 创建新订单
+    const newOrder = {
+      id: Date.now() + Math.random(), // 临时ID
+      items: [],
+      totalAmount: 0
     }
     
+    selectedCustomers[customerIndex].orders.push(newOrder)
+    
     this.setData({
-      showOrderModal: true,
-      tempOrderProducts: [],
-      selectedCustomerIndex: 0
+      selectedCustomers
     })
   },
 
-  hideOrderCreator() {
+  // 移除订单
+  removeOrder(e) {
+    const { customerIndex, orderIndex } = e.currentTarget.dataset
+    const selectedCustomers = [...this.data.selectedCustomers]
+    
+    selectedCustomers[customerIndex].orders.splice(orderIndex, 1)
+    
     this.setData({
-      showOrderModal: false
+      selectedCustomers
     })
+    this.calculateTotalAmount()
   },
 
-  onSelectedCustomerChange(e) {
-    this.setData({
-      selectedCustomerIndex: e.detail.value
-    })
-  },
-
-  showProductSelector() {
+  // 显示商品选择弹窗
+  showProductSelector(e) {
+    const { customerIndex, orderIndex } = e.currentTarget.dataset
     this.setData({
       showProductModal: true,
-      productSearchKeyword: '',
-      filteredProducts: this.data.products
+      currentCustomerIndex: customerIndex,
+      currentOrderIndex: orderIndex
     })
   },
 
+  // 隐藏商品选择弹窗
   hideProductSelector() {
     this.setData({
-      showProductModal: false
+      showProductModal: false,
+      currentCustomerIndex: -1,
+      currentOrderIndex: -1
     })
   },
 
+  // 商品搜索输入
   onProductSearchInput(e) {
     const keyword = e.detail.value
+    this.setData({
+      productSearchKeyword: keyword
+    })
+    
     const filtered = this.data.products.filter(product => 
       product.name.includes(keyword) || product.barcode.includes(keyword)
     )
     
     this.setData({
-      productSearchKeyword: keyword,
       filteredProducts: filtered
     })
   },
 
+  // 选择商品
   selectProduct(e) {
     const product = e.currentTarget.dataset.product
+    const { currentCustomerIndex, currentOrderIndex } = this.data
     
-    // 检查是否已添加
-    const exists = this.data.tempOrderProducts.find(p => p.productId === product._id)
+    if (currentCustomerIndex === -1 || currentOrderIndex === -1) return
+    
+    const selectedCustomers = [...this.data.selectedCustomers]
+    const order = selectedCustomers[currentCustomerIndex].orders[currentOrderIndex]
+    
+    // 检查商品是否已添加
+    const exists = order.items.find(item => item.productId === product._id)
     if (exists) {
       wx.showToast({
         title: '该商品已添加',
@@ -471,167 +499,99 @@ Page({
       return
     }
     
-    const tempProduct = {
+    // 添加商品到订单
+    const newItem = {
       productId: product._id,
-      name: product.name,
+      productName: product.name,
       barcode: product.barcode,
-      image: product.image,
-      unit: product.unit,
+      costPrice: product.costPrice || 0,
+      sellingPrice: product.sellingPrice || 0,
+      retailPrice: product.retailPrice || 0,
       quantity: 1,
-      cost: product.cost,
-      price: product.price,
-      retailPrice: product.price * 1.2 // 默认建议零售价为售价的1.2倍
+      totalPrice: product.sellingPrice || 0
     }
     
-    this.setData({
-      tempOrderProducts: [...this.data.tempOrderProducts, tempProduct],
-      showProductModal: false
-    })
-  },
-
-  removeTempProduct(e) {
-    const index = e.currentTarget.dataset.index
-    const tempOrderProducts = [...this.data.tempOrderProducts]
-    tempOrderProducts.splice(index, 1)
-    
-    this.setData({ tempOrderProducts })
-  },
-
-  // 订单商品输入处理
-  onQuantityInput(e) {
-    const index = e.currentTarget.dataset.index
-    const value = parseInt(e.detail.value) || 0
-    const tempOrderProducts = [...this.data.tempOrderProducts]
-    tempOrderProducts[index].quantity = value
-    
-    this.setData({ tempOrderProducts })
-  },
-
-  onCostInput(e) {
-    const index = e.currentTarget.dataset.index
-    const value = parseFloat(e.detail.value) || 0
-    const tempOrderProducts = [...this.data.tempOrderProducts]
-    tempOrderProducts[index].cost = value
-    
-    this.setData({ tempOrderProducts })
-  },
-
-  onPriceInput(e) {
-    const index = e.currentTarget.dataset.index
-    const value = parseFloat(e.detail.value) || 0
-    const tempOrderProducts = [...this.data.tempOrderProducts]
-    tempOrderProducts[index].price = value
-    
-    this.setData({ tempOrderProducts })
-  },
-
-  onRetailPriceInput(e) {
-    const index = e.currentTarget.dataset.index
-    const value = parseFloat(e.detail.value) || 0
-    const tempOrderProducts = [...this.data.tempOrderProducts]
-    tempOrderProducts[index].retailPrice = value
-    
-    this.setData({ tempOrderProducts })
-  },
-
-  // 确认订单
-  confirmOrder() {
-    const { tempOrderProducts, selectedCustomers, selectedCustomerIndex } = this.data
-    
-    if (tempOrderProducts.length === 0) {
-      wx.showToast({
-        title: '请添加商品',
-        icon: 'none'
-      })
-      return
-    }
-
-    const customer = selectedCustomers[selectedCustomerIndex]
-    const totalAmount = tempOrderProducts.reduce((total, product) => {
-      return total + (product.quantity * product.price)
-    }, 0)
-
-    const order = {
-      customerId: customer._id,
-      customerName: customer.name,
-      products: tempOrderProducts,
-      totalAmount: totalAmount,
-      createTime: new Date().toISOString()
-    }
-
-    this.setData({
-      orders: [...this.data.orders, order],
-      showOrderModal: false
-    })
-    
-    // 更新分组
-    this.groupOrdersByCustomer()
-  },
-
-  // 订单操作
-  addProductToOrder(e) {
-    const orderIndex = e.currentTarget.dataset.orderIndex
-    this.setData({
-      currentOrderIndex: orderIndex,
-      showProductModal: true
-    })
-  },
-
-  removeOrder(e) {
-    const orderIndex = e.currentTarget.dataset.orderIndex
-    const orders = [...this.data.orders]
-    orders.splice(orderIndex, 1)
-    
-    this.setData({ orders })
-    
-    // 更新分组
-    this.groupOrdersByCustomer()
-  },
-
-  // 配送员选择
-  onEmployeeChange(e) {
-    this.setData({
-      employeeIndex: e.detail.value
-    })
-  },
-
-  // 备注输入
-  onRemarkInput(e) {
-    this.setData({
-      remark: e.detail.value
-    })
-  },
-
-  // 获取客户订单数量
-  getCustomerOrderCount(customerId) {
-    if (!customerId) return 0
-    return this.data.orders.filter(order => order.customerId === customerId).length
-  },
-
-  // 按客户分组订单
-  groupOrdersByCustomer() {
-    const grouped = {}
-    
-    this.data.orders.forEach((order, index) => {
-      if (!grouped[order.customerId]) {
-        grouped[order.customerId] = {
-          customerId: order.customerId,
-          customerName: order.customerName,
-          orders: []
-        }
-      }
-      
-      // 为订单添加索引，用于操作
-      order.orderIndex = index
-      grouped[order.customerId].orders.push(order)
-    })
+    order.items.push(newItem)
+    this.calculateOrderAmount(currentCustomerIndex, currentOrderIndex)
     
     this.setData({
-      groupedOrders: Object.values(grouped)
+      selectedCustomers,
+      showProductModal: false,
+      currentCustomerIndex: -1,
+      currentOrderIndex: -1
     })
   },
 
-  // 页面显示时刷新数据
+  // 移除商品
+  removeProduct(e) {
+    const { customerIndex, orderIndex, itemIndex } = e.currentTarget.dataset
+    const selectedCustomers = [...this.data.selectedCustomers]
+    
+    selectedCustomers[customerIndex].orders[orderIndex].items.splice(itemIndex, 1)
+    this.calculateOrderAmount(customerIndex, orderIndex)
+    
+    this.setData({
+      selectedCustomers
+    })
+  },
+
+  // 更新商品数量
+  updateQuantity(e) {
+    const { customerIndex, orderIndex, itemIndex } = e.currentTarget.dataset
+    const quantity = parseInt(e.detail.value) || 0
+    const selectedCustomers = [...this.data.selectedCustomers]
+    
+    const item = selectedCustomers[customerIndex].orders[orderIndex].items[itemIndex]
+    item.quantity = quantity
+    item.totalPrice = item.sellingPrice * quantity
+    
+    this.calculateOrderAmount(customerIndex, orderIndex)
+    
+    this.setData({
+      selectedCustomers
+    })
+  },
+
+  // 更新商品价格
+  updatePrice(e) {
+    const { customerIndex, orderIndex, itemIndex, priceType } = e.currentTarget.dataset
+    const price = parseFloat(e.detail.value) || 0
+    const selectedCustomers = [...this.data.selectedCustomers]
+    
+    const item = selectedCustomers[customerIndex].orders[orderIndex].items[itemIndex]
+    item[priceType] = price
+    item.totalPrice = item.sellingPrice * item.quantity
+    
+    this.calculateOrderAmount(customerIndex, orderIndex)
+    
+    this.setData({
+      selectedCustomers
+    })
+  },
+
+  // 计算订单金额
+  calculateOrderAmount(customerIndex, orderIndex) {
+    const selectedCustomers = [...this.data.selectedCustomers]
+    const order = selectedCustomers[customerIndex].orders[orderIndex]
+    
+    order.totalAmount = order.items.reduce((sum, item) => sum + item.totalPrice, 0)
+    
+    // 计算客户总金额
+    selectedCustomers[customerIndex].totalAmount = selectedCustomers[customerIndex].orders.reduce((sum, order) => sum + order.totalAmount, 0)
+    
+    this.setData({
+      selectedCustomers
+    })
+  },
+
+  // 计算总金额
+  calculateTotalAmount() {
+    const totalAmount = this.data.selectedCustomers.reduce((sum, customer) => sum + customer.totalAmount, 0)
+    this.setData({
+      totalAmount
+    })
+  },
+
   onShow() {
     if (this.data.deliveryId) {
       this.loadDeliveryDetail()

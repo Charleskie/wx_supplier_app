@@ -1,4 +1,142 @@
 <!--pages/create-delivery/create-delivery.wxml-->
 <view class="container">
-  <text>创建送货单页面 - 开发中</text>
+  <!-- 页面标题 -->
+  <view class="page-header">
+    <text class="page-title">创建送货单</text>
+  </view>
+
+  <!-- 客户列表 -->
+  <view class="section">
+    <view class="section-header">
+      <text class="section-title">客户列表</text>
+      <button class="btn-add" bindtap="showCustomerSelector">添加客户</button>
+    </view>
+    
+    <view class="customer-list" wx:if="{{selectedCustomers.length > 0}}">
+      <view class="customer-item" wx:for="{{selectedCustomers}}" wx:key="index">
+        <view class="customer-header">
+          <view class="customer-info">
+            <text class="customer-name">{{item.name}}</text>
+            <text class="customer-phone">{{item.phone}}</text>
+          </view>
+          <view class="customer-actions">
+            <text class="customer-total">¥{{item.totalAmount}}</text>
+            <button class="btn-remove" bindtap="removeCustomer" data-index="{{index}}">移除</button>
+          </view>
+        </view>
+        
+        <!-- 订单列表 -->
+        <view class="order-list">
+          <view class="order-header">
+            <text class="order-title">订单列表</text>
+            <button class="btn-add-order" bindtap="addOrder" data-customer-index="{{index}}">添加订单</button>
+          </view>
+          
+          <view class="order-item" wx:for="{{item.orders}}" wx:for-item="order" wx:for-index="orderIndex" wx:key="orderIndex">
+            <view class="order-info">
+              <text class="order-no">订单 {{orderIndex + 1}}</text>
+              <text class="order-amount">¥{{order.totalAmount}}</text>
+              <button class="btn-remove-order" bindtap="removeOrder" data-customer-index="{{index}}" data-order-index="{{orderIndex}}">删除</button>
+            </view>
+            
+            <!-- 商品列表 -->
+            <view class="product-list">
+              <view class="product-header">
+                <text class="product-title">商品列表</text>
+                <button class="btn-add-product" bindtap="showProductSelector" data-customer-index="{{index}}" data-order-index="{{orderIndex}}">添加商品</button>
+              </view>
+              
+              <view class="product-item" wx:for="{{order.items}}" wx:for-item="product" wx:for-index="itemIndex" wx:key="itemIndex">
+                <view class="product-info">
+                  <text class="product-name">{{product.productName}}</text>
+                  <text class="product-barcode">{{product.barcode}}</text>
+                </view>
+                
+                <view class="product-details">
+                  <view class="input-group">
+                    <text class="label">数量:</text>
+                    <input class="input-quantity" type="number" value="{{product.quantity}}" bindinput="updateQuantity" data-customer-index="{{index}}" data-order-index="{{orderIndex}}" data-item-index="{{itemIndex}}" />
+                  </view>
+                  
+                  <view class="input-group">
+                    <text class="label">成本价:</text>
+                    <input class="input-price" type="digit" value="{{product.costPrice}}" bindinput="updatePrice" data-customer-index="{{index}}" data-order-index="{{orderIndex}}" data-item-index="{{itemIndex}}" data-price-type="costPrice" />
+                  </view>
+                  
+                  <view class="input-group">
+                    <text class="label">售价:</text>
+                    <input class="input-price" type="digit" value="{{product.sellingPrice}}" bindinput="updatePrice" data-customer-index="{{index}}" data-order-index="{{orderIndex}}" data-item-index="{{itemIndex}}" data-price-type="sellingPrice" />
+                  </view>
+                  
+                  <view class="input-group">
+                    <text class="label">建议零售价:</text>
+                    <input class="input-price" type="digit" value="{{product.retailPrice}}" bindinput="updatePrice" data-customer-index="{{index}}" data-order-index="{{orderIndex}}" data-item-index="{{itemIndex}}" data-price-type="retailPrice" />
+                  </view>
+                  
+                  <view class="product-total">
+                    <text class="total-label">小计:</text>
+                    <text class="total-amount">¥{{product.totalPrice}}</text>
+                  </view>
+                </view>
+                
+                <button class="btn-remove-product" bindtap="removeProduct" data-customer-index="{{index}}" data-order-index="{{orderIndex}}" data-item-index="{{itemIndex}}">删除</button>
+              </view>
+            </view>
+          </view>
+        </view>
+      </view>
+    </view>
+    
+    <view class="empty-state" wx:else>
+      <text class="empty-text">请先添加客户</text>
+    </view>
+  </view>
+
+  <!-- 总金额 -->
+  <view class="total-section">
+    <text class="total-label">总金额:</text>
+    <text class="total-amount">¥{{totalAmount}}</text>
+  </view>
+
+  <!-- 创建按钮 -->
+  <view class="action-section">
+    <button class="btn-create" bindtap="createDelivery" loading="{{loading}}" disabled="{{loading}}">
+      创建送货单
+    </button>
+  </view>
+
+  <!-- 客户选择弹窗 -->
+  <view class="modal" wx:if="{{showCustomerModal}}">
+    <view class="modal-mask" bindtap="hideCustomerSelector"></view>
+    <view class="modal-content">
+      <view class="modal-header">
+        <text class="modal-title">选择客户</text>
+        <button class="btn-close" bindtap="hideCustomerSelector">×</button>
+      </view>
+      <view class="modal-body">
+        <view class="customer-option" wx:for="{{customers}}" wx:key="_id" bindtap="selectCustomer" data-customer="{{item}}">
+          <text class="customer-name">{{item.name}}</text>
+          <text class="customer-phone">{{item.phone}}</text>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 商品选择弹窗 -->
+  <view class="modal" wx:if="{{showProductModal}}">
+    <view class="modal-mask" bindtap="hideProductSelector"></view>
+    <view class="modal-content">
+      <view class="modal-header">
+        <text class="modal-title">选择商品</text>
+        <button class="btn-close" bindtap="hideProductSelector">×</button>
+      </view>
+      <view class="modal-body">
+        <view class="product-option" wx:for="{{products}}" wx:key="_id" bindtap="selectProduct" data-product="{{item}}">
+          <text class="product-name">{{item.name}}</text>
+          <text class="product-barcode">{{item.barcode}}</text>
+          <text class="product-price">¥{{item.sellingPrice}}</text>
+        </view>
+      </view>
+    </view>
+  </view>
 </view> 

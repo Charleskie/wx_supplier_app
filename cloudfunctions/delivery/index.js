@@ -118,7 +118,7 @@ async function getDeliveryDetail(data) {
 
 // 创建送货单
 async function createDelivery(data) {
-  const { customers, orders, employeeId, employeeName, remark, status, totalAmount } = data
+  const { customers, totalAmount, status } = data
 
   try {
     // 生成送货单号
@@ -140,12 +140,8 @@ async function createDelivery(data) {
       data: {
         deliveryNo,
         customers,
-        orders,
-        employeeId,
-        employeeName,
         status: status || 'pending',
         totalAmount,
-        remark: remark || '',
         createTime: new Date().toISOString(),
         updateTime: new Date().toISOString()
       }
@@ -171,17 +167,13 @@ async function createDelivery(data) {
 
 // 更新送货单
 async function updateDelivery(data) {
-  const { id, customers, orders, employeeId, employeeName, remark, status, totalAmount } = data
+  const { id, customers, status, totalAmount } = data
 
   try {
     const updateData = {
       customers,
-      orders,
-      employeeId,
-      employeeName,
       status,
       totalAmount,
-      remark,
       updateTime: new Date().toISOString()
     }
 

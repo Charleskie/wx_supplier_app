@@ -1,7 +1,6 @@
 <!--pages/login/login.wxml-->
 <view class="container">
   <view class="login-header">
-    <image class="logo" src="/images/logo.png" mode="aspectFit"></image>
     <text class="title">供应商订单管理系统</text>
     <text class="subtitle">请登录您的账户</text>
   </view>
